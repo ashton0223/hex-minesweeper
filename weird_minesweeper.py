@@ -61,6 +61,13 @@ def find_nearby_tiles(tile, board):
             nearby.append(board[x + 1][y - 1])
     return nearby
 
+def find_nearby_mines(tiles):
+    mines = 0
+    for tile in tiles:
+        if tile.mine:
+            mines += 1
+    return mines
+
 # TODO: Make this more precise somehow
 def find_point_pos(pos):
     return[
@@ -105,6 +112,10 @@ def gen_coordinates():
     return board
 
 def main():
+    # Init pygame
+    pygame.init()
+    font = pygame.font.SysFont('arial', H * 2)
+
     # Setup board
     screen = pygame.display.set_mode((640,480))
     screen.fill(BLACK)
@@ -145,8 +156,11 @@ def main():
                     draw_hexagon(screen, tile.pos, GREY)
                     draw_grid(screen, board) #TODO: Replace with single hex
                     nearby_tiles = find_nearby_tiles(tile, board)
-                    for i in nearby_tiles:
-                        draw_hexagon(screen, i.pos, PURPLE)
+                    mines = find_nearby_mines(nearby_tiles)
+                    font = pygame.font.SysFont('arial', H * 2)
+                    text = font.render(str(mines), True, (0, 0, 0))
+                    aligned_pos = (tile.pos[0] - (RADIUS / 2), tile.pos[1] - RADIUS)
+                    screen.blit(text, aligned_pos)
                     pygame.display.update()
         
 
