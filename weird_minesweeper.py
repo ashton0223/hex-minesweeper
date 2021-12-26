@@ -106,7 +106,8 @@ def gen_coordinates():
             if j % 2:
                 x += floor(RADIUS / 2 * sqrt(3))
             board[i][j].pos = (x, y)
-            board[i][j].mine = bool(random.getrandbits(1))
+            num = random.randint(0, 4)
+            board[i][j].mine = num == 0
             board[i][j].board_pos = (i, j)
     
     return board
