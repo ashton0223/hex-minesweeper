@@ -5,6 +5,8 @@ from math import pi, cos, sin, sqrt, floor
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+GREY = (150, 150, 150)
+PURPLE = (128, 0, 128)
 RADIUS = 20
 W = 15
 H = 15
@@ -13,16 +15,17 @@ H = 15
 random.seed(5)
 
 class Tile:
-    def __init__(self, pos, mine):
+    def __init__(self, pos, board_pos, mine,):
         self.pos = pos
         self.mine = mine
+        self.board_pos = board_pos
 
 def find_distance(pos1, pos2):
     return sqrt((pos1[0] - pos2[0]) ** 2 + (pos1[1] - pos2[1]) ** 2)
 
 def find_closest_tile(board, pos):
     low_distance = 99999 # Impossibly high
-    closest = Tile((0, 0), False)
+    closest = Tile((0, 0), (0, 0), False)
     for row in board:
         for tile in row:
             distance = find_distance(tile.pos, pos)
@@ -35,6 +38,28 @@ def find_closest_tile(board, pos):
 
     return closest   
 
+def find_nearby_tiles(tile, board):
+    nearby = []
+    x, y = tile.board_pos
+    if x > 0:
+        nearby.append(board[x - 1][y])
+    if x < W - 1:
+        nearby.append(board[x + 1][y])
+    if y > 0:
+        nearby.append(board[x][y - 1])
+    if y < H - 1:
+        nearby.append(board[x][y + 1])
+    if y % 2 == 0 and x > 0:
+        if y < H - 1:
+            nearby.append(board[x - 1][y + 1])
+        if y > 0:
+            nearby.append(board[x - 1][y - 1])
+    if y % 2 != 0 and x < W - 1:
+        if y < H - 1:
+            nearby.append(board[x + 1][y + 1])
+        if y > 0:
+            nearby.append(board[x + 1][y - 1])
+    return nearby
 
 # TODO: Make this more precise somehow
 def find_point_pos(pos):
@@ -65,7 +90,7 @@ def draw_grid(surface, board):
 
 
 def gen_coordinates():
-    board = [[Tile((0, 0), False) for i in range(W)] for j in range(H)]
+    board = [[Tile((0, 0), (0, 0), False) for i in range(W)] for j in range(H)]
     left = 0
     for i in range(W):
         for j in range(H):
@@ -75,6 +100,7 @@ def gen_coordinates():
                 x += floor(RADIUS / 2 * sqrt(3))
             board[i][j].pos = (x, y)
             board[i][j].mine = bool(random.getrandbits(1))
+            board[i][j].board_pos = (i, j)
     
     return board
 
@@ -93,24 +119,35 @@ def main():
     draw_grid(screen, board)
     
     pygame.display.update()
+    
+    hold_tile = None
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                pos = pygame.mouse.get_pos()
+                hold_tile = find_closest_tile(board, pos)
             elif event.type == pygame.MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
                 tile = find_closest_tile(board, pos)
 
-                # If in the middle of two tiles
-                if tile is None:
+                # If in the middle of two tiles or moved mouse during click
+                if tile is None or hold_tile is None or hold_tile != tile:
                     continue
 
                 if tile.mine:
                     print('mine')
                 else:
                     print('safe')
+                    draw_hexagon(screen, tile.pos, GREY)
+                    draw_grid(screen, board) #TODO: Replace with single hex
+                    nearby_tiles = find_nearby_tiles(tile, board)
+                    for i in nearby_tiles:
+                        draw_hexagon(screen, i.pos, PURPLE)
+                    pygame.display.update()
         
 
 if __name__ == '__main__':
