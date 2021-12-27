@@ -151,10 +151,7 @@ def main():
     board = gen_coordinates()
     for row in board:
         for tile in row:
-            if tile.mine:
-                draw_hexagon(screen, tile.pos, RED)
-            else:
-                draw_hexagon(screen, tile.pos, WHITE)
+            draw_hexagon(screen, tile.pos, WHITE)
     
     draw_grid(screen, board)
     
