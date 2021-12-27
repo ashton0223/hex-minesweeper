@@ -144,6 +144,8 @@ def reveal(screen, board, tile):
     return board
                 
 def flag(screen, board, tile):
+    if tile.revealed:
+        return board
     x, y = tile.board_pos
     board[x][y].flagged = not board[x][y].flagged
     draw_hexagon(screen, tile.pos, YELLOW)
