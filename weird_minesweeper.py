@@ -8,6 +8,8 @@ WHITE = (255, 255, 255)
 GREY = (150, 150, 150)
 PURPLE = (128, 0, 128)
 RADIUS = 20
+LEFT = 1
+RIGHT = 3
 W = 15
 H = 15
 
@@ -165,17 +167,18 @@ def main():
                 pygame.quit()
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
-                hold_tile = find_closest_tile(board, pos)
+                if event.button == LEFT:
+                    pos = pygame.mouse.get_pos()
+                    hold_tile = find_closest_tile(board, pos)
             elif event.type == pygame.MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
                 tile = find_closest_tile(board, pos)
 
-                # If in the middle of two tiles or moved mouse during click
+                    # If in the middle of two tiles or moved mouse during click
                 if tile is None or hold_tile is None or hold_tile != tile:
                     continue
-
-                board = reveal(screen, board, tile)    
+                if event.button == LEFT:
+                    board = reveal(screen, board, tile)    
                 pygame.display.update()
         
 
