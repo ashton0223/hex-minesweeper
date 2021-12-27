@@ -21,7 +21,10 @@ class Tile:
         self.board_pos = board_pos
 
 def find_distance(pos1, pos2):
-    return sqrt((pos1[0] - pos2[0]) ** 2 + (pos1[1] - pos2[1]) ** 2)
+    if pos1 == pos2:
+        return 0
+    else:
+        return sqrt((pos1[0] - pos2[0]) ** 2 + (pos1[1] - pos2[1]) ** 2)
 
 def find_closest_tile(board, pos):
     low_distance = 99999 # Impossibly high
@@ -30,7 +33,9 @@ def find_closest_tile(board, pos):
         for tile in row:
             distance = find_distance(tile.pos, pos)
             if distance == low_distance:
-                print('something went wrong')
+                # Center of a tile is equidistant from other tiles
+                if low_distance > RADIUS:
+                    continue
                 return None
             elif distance < low_distance:
                 low_distance = distance
