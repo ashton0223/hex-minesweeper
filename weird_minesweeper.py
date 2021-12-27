@@ -15,10 +15,11 @@ H = 15
 random.seed(5)
 
 class Tile:
-    def __init__(self, pos, board_pos, mine,):
+    def __init__(self, pos, board_pos, mine):
         self.pos = pos
         self.mine = mine
         self.board_pos = board_pos
+        self.revealed = False
 
 def find_distance(pos1, pos2):
     if pos1 == pos2:
@@ -126,13 +127,19 @@ def reveal(screen, board, tile):
         draw_grid(screen, board) #TODO: Replace with single hex
         nearby_tiles = find_nearby_tiles(tile, board)
         mines = find_nearby_mines(nearby_tiles)
+        x, y = tile.board_pos
+        board[x][y].revealed = True
         if mines != 0:
             font = pygame.font.SysFont('arial', H * 2)
             text = font.render(str(mines), True, (0, 0, 0))
             aligned_pos = (tile.pos[0] - (RADIUS / 2), tile.pos[1] - RADIUS)
             screen.blit(text, aligned_pos)
         else:
-            pass # Big block
+            for nearby_tile in nearby_tiles:
+                if not nearby_tile.revealed:
+                    board = reveal(screen, board, nearby_tile)
+    return board
+                
 
 def main():
     # Init pygame
@@ -171,7 +178,7 @@ def main():
                 if tile is None or hold_tile is None or hold_tile != tile:
                     continue
 
-                reveal(screen, board, tile)    
+                board = reveal(screen, board, tile)    
                 pygame.display.update()
         
 
