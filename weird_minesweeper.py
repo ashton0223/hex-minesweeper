@@ -6,7 +6,7 @@ RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GREY = (150, 150, 150)
-PURPLE = (128, 0, 128)
+YELLOW = (255, 255, 0)
 RADIUS = 20
 LEFT = 1
 RIGHT = 3
@@ -22,6 +22,7 @@ class Tile:
         self.mine = mine
         self.board_pos = board_pos
         self.revealed = False
+        self.flagged = False
 
 def find_distance(pos1, pos2):
     if pos1 == pos2:
@@ -142,6 +143,12 @@ def reveal(screen, board, tile):
                     board = reveal(screen, board, nearby_tile)
     return board
                 
+def flag(screen, board, tile):
+    x, y = tile.board_pos
+    board[x][y].flagged = not board[x][y].flagged
+    draw_hexagon(screen, tile.pos, YELLOW)
+    draw_grid(screen, board)
+    return board
 
 def main():
     # Init pygame
@@ -159,26 +166,29 @@ def main():
     
     pygame.display.update()
     
-    hold_tile = None
+    hold_tile_left = None
+    hold_tile_right = None
 
     while True:
         for event in pygame.event.get():
+            pos = pygame.mouse.get_pos()
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == LEFT:
-                    pos = pygame.mouse.get_pos()
-                    hold_tile = find_closest_tile(board, pos)
+                    hold_tile_left = find_closest_tile(board, pos)
+                elif event.button == RIGHT:
+                    hold_tile_right = find_closest_tile(board, pos)
+                    print('test')
             elif event.type == pygame.MOUSEBUTTONUP:
-                pos = pygame.mouse.get_pos()
                 tile = find_closest_tile(board, pos)
-
-                    # If in the middle of two tiles or moved mouse during click
-                if tile is None or hold_tile is None or hold_tile != tile:
+                if tile is None:
                     continue
-                if event.button == LEFT:
-                    board = reveal(screen, board, tile)    
+                if event.button == LEFT and hold_tile_left is not None and hold_tile_left == tile:
+                    board = reveal(screen, board, tile)   
+                elif event.button == RIGHT and hold_tile_right is not None and hold_tile_right == tile:
+                    board = flag(screen, board, tile) 
                 pygame.display.update()
         
 
